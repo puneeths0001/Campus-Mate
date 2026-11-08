@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import date
-from theme import apply_theme
+from theme import apply_theme, glass_table
 
 st.set_page_config(page_title="Expenses | Campus Mate", page_icon="💸", layout="wide")
 apply_theme()
@@ -52,5 +52,8 @@ else:
     b.plotly_chart(px.bar(df.groupby("Payment method", as_index=False)["Amount"].sum(),
                           x="Payment method", y="Amount", title="By payment method"),
                    use_container_width=True)
-    st.dataframe(df, use_container_width=True,
-                 column_config={"Date": st.column_config.DateColumn(format="DD/MM/YYYY")})
+    st.subheader("All expenses")
+    show = df.copy()
+    show["Date"] = pd.to_datetime(show["Date"]).dt.strftime("%d/%m/%Y")
+    show["Amount"] = show["Amount"].map(lambda v: f"₹{v:,.2f}")
+    glass_table(show.iloc[::-1], right=["Amount"])   # newest first

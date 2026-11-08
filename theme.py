@@ -1,4 +1,5 @@
 # theme.py - glassmorphism look: deep indigo background, blurred colour blobs, frosted-glass cards
+import html as _html
 import streamlit as st
 
 def apply_theme():
@@ -101,6 +102,29 @@ def apply_theme():
         transition: transform .2s, box-shadow .2s; }
     .stButton > button:hover, [data-testid="stFormSubmitButton"] button:hover {
         transform: translateY(-2px); color: #fff; border-color: rgba(255,255,255,.7); box-shadow: 0 10px 28px rgba(124,156,255,.45); }
+    /* Frosted-glass tables (drawn with real HTML, so the glass shows through) */
+    .gt-wrap { overflow-x: auto; border-radius: 22px; border: 1px solid rgba(255,255,255,.26);
+        background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+        backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+        box-shadow: 0 14px 34px rgba(5,5,40,.28), inset 0 1px 0 rgba(255,255,255,.3); }
+    .gt { width: 100%; border-collapse: collapse; color: #fff; font-size: 15px; }
+    .gt th { text-align: left; font-weight: 600; color: rgba(255,255,255,.75); padding: 13px 18px;
+        background: rgba(255,255,255,.07); border-bottom: 1px solid rgba(255,255,255,.2); }
+    .gt td { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,.10); }
+    .gt tr:last-child td { border-bottom: none; }
+    .gt tbody tr:hover td { background: rgba(255,255,255,.08); }
+    .gt .r { text-align: right; }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
     </style>
     """, unsafe_allow_html=True)
+
+
+def glass_table(df, right=()):
+    """Draws a pandas table as a frosted-glass HTML table. 'right' lists the columns to right-align (numbers)."""
+    head = "".join(f'<th class="{"r" if c in right else ""}">{_html.escape(str(c))}</th>' for c in df.columns)
+    rows = "".join(
+        "<tr>" + "".join(f'<td class="{"r" if c in right else ""}">{_html.escape(str(v))}</td>'
+                         for c, v in zip(df.columns, row)) + "</tr>"
+        for row in df.itertuples(index=False))
+    st.markdown(f'<div class="gt-wrap"><table class="gt"><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>',
+                unsafe_allow_html=True)

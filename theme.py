@@ -60,6 +60,8 @@ def apply_theme():
     [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"]:focus-within > div {
         border-color: rgba(255,255,255,.75) !important; box-shadow: 0 0 0 3px rgba(124,156,255,.30), 0 8px 24px rgba(5,5,40,.25); }
     input::placeholder, textarea::placeholder { color: rgba(255,255,255,.45) !important; }
+    /* Hide the small "Press Enter to submit form" hint that sits on top of the typing area */
+    [data-testid="InputInstructions"], [data-testid="stTextInput"] [class*="InputInstructions"] { display: none !important; }
     /* Boards (bordered containers) and message bars are glass too */
     [data-testid="stVerticalBlockBorderWrapper"] { background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
         border: 1px solid rgba(255,255,255,.24) !important; border-radius: 24px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);

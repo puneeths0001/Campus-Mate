@@ -114,18 +114,30 @@ def apply_theme():
     .gt tr:last-child td { border-bottom: none; }
     .gt tbody tr:hover td { background: rgba(255,255,255,.08); }
     .gt .r { text-align: right; }
-    /* Sidebar menu: every item is a frosted-glass pill that giggles when you hover over it */
-    [data-testid="stSidebarNav"] a {
-        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.04));
-        border: 1px solid rgba(255,255,255,.22); border-radius: 16px; margin: 6px 12px; padding: 4px 6px;
+    /* Sidebar menu: frosted-glass pills that slide in, float gently, and giggle when you hover */
+    [data-testid="stSidebarNav"] a, a[data-testid="stSidebarNavLink"] {
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.04)) !important;
+        border: 1px solid rgba(255,255,255,.22) !important; border-radius: 16px !important; margin: 6px 12px; padding: 4px 6px;
         backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
         box-shadow: 0 6px 16px rgba(5,5,40,.22), inset 0 1px 0 rgba(255,255,255,.28);
+        animation: float 4.5s ease-in-out infinite; animation-delay: var(--f, 0s);
         transition: border-color .2s, background .2s; }
-    [data-testid="stSidebarNav"] a:hover {
-        animation: giggle .6s ease-in-out; border-color: rgba(255,255,255,.6);
-        background: linear-gradient(135deg, rgba(255,255,255,.30), rgba(255,255,255,.10)); }
-    [data-testid="stSidebarNav"] a[aria-current="page"] {
-        background: linear-gradient(135deg, rgba(255,255,255,.38), rgba(255,255,255,.16)); border-color: rgba(255,255,255,.65); }
+    [data-testid="stSidebarNav"] li { animation: slidein .5s ease-out both; animation-delay: var(--d, 0s); }
+    [data-testid="stSidebarNav"] li:nth-child(1) { --d: 0.00s; --f: -0.0s; }
+    [data-testid="stSidebarNav"] li:nth-child(2) { --d: 0.08s; --f: -0.7s; }
+    [data-testid="stSidebarNav"] li:nth-child(3) { --d: 0.16s; --f: -1.4s; }
+    [data-testid="stSidebarNav"] li:nth-child(4) { --d: 0.24s; --f: -2.1s; }
+    [data-testid="stSidebarNav"] li:nth-child(5) { --d: 0.32s; --f: -2.8s; }
+    [data-testid="stSidebarNav"] li:nth-child(6) { --d: 0.40s; --f: -3.5s; }
+    [data-testid="stSidebarNav"] li:nth-child(7) { --d: 0.48s; --f: -4.2s; }
+    [data-testid="stSidebarNav"] li:nth-child(8) { --d: 0.56s; --f: -4.9s; }
+    [data-testid="stSidebarNav"] a:hover, a[data-testid="stSidebarNavLink"]:hover {
+        animation: giggle .6s ease-in-out !important; border-color: rgba(255,255,255,.6) !important;
+        background: linear-gradient(135deg, rgba(255,255,255,.30), rgba(255,255,255,.10)) !important; }
+    [data-testid="stSidebarNav"] a[aria-current="page"], a[data-testid="stSidebarNavLink"][aria-current="page"] {
+        background: linear-gradient(135deg, rgba(255,255,255,.38), rgba(255,255,255,.16)) !important; border-color: rgba(255,255,255,.65) !important; }
+    @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
+    @keyframes slidein { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes giggle {
         0%, 100% { transform: rotate(0) scale(1.03); } 20% { transform: rotate(-2.5deg) scale(1.05); }
         40% { transform: rotate(2.5deg) scale(1.05); } 60% { transform: rotate(-1.5deg) scale(1.04); }

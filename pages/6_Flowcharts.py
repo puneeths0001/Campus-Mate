@@ -16,6 +16,7 @@ if st.button("Make flowchart") and notes.strip():
     prompt = f"""Turn these study notes into a clear flowchart in Graphviz DOT language.
 Rules: reply with DOT code only. Use digraph with rankdir={rank}. Keep node labels under 6 words.
 Use shape=box, style="rounded,filled", fillcolor in soft pastel colors, fontname="Helvetica".
+Also set graph [bgcolor="transparent"]; edge [color="#9A9AA5"]; node [fontcolor="#0B0B0F"] because the page is dark.
 Use at most 15 nodes and group the main ideas.
 NOTES:
 {notes}"""

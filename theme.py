@@ -36,15 +36,24 @@ def apply_theme():
     [data-testid="stSidebarNav"] a[aria-current="page"] span { color: #fff !important; }
 
     /* Inputs and buttons also look like glass */
-    /* Every place you type or choose becomes frosted glass */
+    /* Every place you type or choose becomes frosted glass.
+       Step 1: the outer box gets the glass recipe */
     [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div, [data-testid="stAudioInput"] {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05)) !important;
         backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
         border: 1px solid rgba(255,255,255,.28) !important; border-radius: 16px !important;
         box-shadow: 0 8px 24px rgba(5,5,40,.25), inset 0 1px 0 rgba(255,255,255,.3);
         transition: border-color .2s, box-shadow .2s; }
-    [data-baseweb="base-input"], [data-baseweb="input"] input, [data-baseweb="textarea"] textarea,
-    [data-testid="stNumberInput"] button { background: transparent !important; color: #fff !important; }
+    /* Step 2: every layer inside (and the wrappers around) must be see-through, or the dark colour shows */
+    [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"],
+    [data-baseweb="base-input"], [data-baseweb="input"] > div, [data-baseweb="textarea"] > div,
+    [data-baseweb="input"] input, [data-baseweb="textarea"] textarea, [data-testid="stNumberInput"] button,
+    [data-testid="stAudioInput"] div, [data-testid="stAudioInput"] canvas {
+        background: transparent !important; background-color: transparent !important; color: #fff !important; }
+    [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"] {
+        border: none !important; box-shadow: none !important; }
+    /* Embedded components (like the location button) paint a solid dark box unless told to match */
+    iframe { color-scheme: light; background: transparent !important; }
     [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"]:focus-within > div {
         border-color: rgba(255,255,255,.75) !important; box-shadow: 0 0 0 3px rgba(124,156,255,.30), 0 8px 24px rgba(5,5,40,.25); }
     input::placeholder, textarea::placeholder { color: rgba(255,255,255,.45) !important; }

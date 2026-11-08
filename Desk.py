@@ -3,7 +3,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import html
 import pandas as pd
-from datetime import date
+from datetime import date, datetime
 from theme import apply_theme
 
 st.set_page_config(page_title="Desk | Campus Mate", page_icon="🎓", layout="wide")
@@ -85,9 +85,10 @@ if df is not None and not df.empty:
 else:
     spent, spent_label = "₹3,450", "Expenses this month (sample)"
 
-items = sorted(st.session_state.get("reminders", []), key=lambda r: r["Due"])[:4]
+notes = [r for r in st.session_state.get("reminders", []) if r.get("Type") != "exam"]
+items = sorted(notes, key=lambda r: (r["Due"] is None, r["Due"] or datetime.max))[:4]
 if items:
-    rows = [(r["Task"], f"{r['Due']:%d %b, %I:%M %p}") for r in items]
+    rows = [(r["Task"], f"{r['Due']:%d %b, %I:%M %p}" if r["Due"] else "Note") for r in items]
     notes_label = "Assignments & notes"
 else:
     rows = [("Maths assignment", "Fri, 5 pm"), ("Physics lab record", "Mon"),

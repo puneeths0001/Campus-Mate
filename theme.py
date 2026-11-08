@@ -38,25 +38,35 @@ def apply_theme():
     /* Inputs and buttons also look like glass */
     /* Every place you type or choose becomes frosted glass.
        Step 1: the outer box gets the glass recipe */
-    [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div, [data-testid="stAudioInput"] {
+    [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div, [data-testid="stAudioInput"],
+    [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"] {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05)) !important;
         backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
         border: 1px solid rgba(255,255,255,.28) !important; border-radius: 16px !important;
         box-shadow: 0 8px 24px rgba(5,5,40,.25), inset 0 1px 0 rgba(255,255,255,.3);
         transition: border-color .2s, box-shadow .2s; }
     /* Step 2: every layer inside (and the wrappers around) must be see-through, or the dark colour shows */
-    [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"],
     [data-baseweb="base-input"], [data-baseweb="input"] > div, [data-baseweb="textarea"] > div,
     [data-baseweb="input"] input, [data-baseweb="textarea"] textarea, [data-testid="stNumberInput"] button,
     [data-testid="stAudioInput"] div, [data-testid="stAudioInput"] canvas {
         background: transparent !important; background-color: transparent !important; color: #fff !important; }
-    [data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stNumberInputContainer"] {
-        border: none !important; box-shadow: none !important; }
+    /* if Streamlit nests one box inside another, only the outer one draws the glass */
+    [data-testid="stTextInputRootElement"] [data-baseweb="input"], [data-testid="stTextAreaRootElement"] [data-baseweb="textarea"] {
+        background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; }
+    [data-testid="stAudioInput"] span, [data-testid="stAudioInput"] code, [data-testid="stAudioInput"] p {
+        background: transparent !important; color: rgba(255,255,255,.8) !important; }
     /* Embedded components (like the location button) paint a solid dark box unless told to match */
     iframe { color-scheme: light; background: transparent !important; }
     [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"]:focus-within > div {
         border-color: rgba(255,255,255,.75) !important; box-shadow: 0 0 0 3px rgba(124,156,255,.30), 0 8px 24px rgba(5,5,40,.25); }
     input::placeholder, textarea::placeholder { color: rgba(255,255,255,.45) !important; }
+    /* Boards (bordered containers) and message bars are glass too */
+    [data-testid="stVerticalBlockBorderWrapper"] { background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+        border: 1px solid rgba(255,255,255,.24) !important; border-radius: 24px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+        box-shadow: 0 14px 34px rgba(5,5,40,.28), inset 0 1px 0 rgba(255,255,255,.25); }
+    [data-testid="stAlert"] { background: rgba(255,255,255,.08) !important; border: 1px solid rgba(255,255,255,.22); border-radius: 18px;
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    [data-testid="stAlert"] > div { background: transparent !important; }
     /* Dropdown lists, forms, expanders and tables */
     [data-baseweb="popover"] [data-baseweb="menu"], [data-baseweb="popover"] [role="listbox"] {
         background: rgba(40,33,100,.78) !important; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);

@@ -1,4 +1,4 @@
-# pages/1_Safety_SOS.py - SOS alert, live location, and a parent view
+# pages/1_Safety_SOS.py - SOS alert and live location sent to the parent on Telegram
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -6,28 +6,27 @@ from streamlit_geolocation import streamlit_geolocation
 from streamlit_autorefresh import st_autorefresh
 from theme import apply_theme
 from ai import ask_gemini, parse_json
-from notify import send_sms
+from notify import link_widget, send_message, send_location, update_live, replies
 
 st.set_page_config(page_title="Safety | Campus Mate", page_icon="🚨", layout="wide")
 apply_theme()
 
 @st.cache_resource
 def shared():
-    """One dictionary shared by every visitor while the server runs. This is how the parent sees the student."""
+    """Memory shared by every visitor while the server runs (used by the optional web parent view)."""
     return {"locations": [], "alerts": []}
 box = shared()
 
-# ---------- Parent view: open this page with ?parent=1 at the end of the link ----------
+# ---------- Optional web view for parents: open this page with ?parent=1 at the end of the link ----------
 if st.query_params.get("parent"):
-    st_autorefresh(interval=30000, key="parent_refresh")   # refresh every 30 seconds
+    st_autorefresh(interval=30000, key="parent_refresh")
     st.title("👨‍👩‍👧 Parent view")
     if box["alerts"]:
         a = box["alerts"][-1]
         st.error(f"🚨 EMERGENCY at {a['time']} ({a['reason']}). Map: {a['link']}")
     if box["locations"]:
         df = pd.DataFrame(box["locations"])
-        last = df.iloc[-1]
-        st.metric("Last seen", last["time"])
+        st.metric("Last seen", df.iloc[-1]["time"])
         st.map(df[["lat", "lon"]])
         st.dataframe(df, use_container_width=True)
     else:
@@ -36,9 +35,8 @@ if st.query_params.get("parent"):
 
 # ---------- Student view ----------
 st.title("🚨 Safety")
-c1, c2 = st.columns(2)
-parent = c1.text_input("Parent's phone (+91...)")
-wa = c2.checkbox("Send on WhatsApp (Twilio sandbox)")
+st.write("**Step 0.** Connect your parent's Telegram (one time only).")
+parent_ok = link_widget("parent", "Parent")
 
 st.write("**Step 1.** Tap the target button and allow location in your browser.")
 loc = streamlit_geolocation()
@@ -51,24 +49,27 @@ def log_location():
 share = st.toggle("Share my live location with my parents (updates every 5 minutes)")
 if share and has_loc:
     st_autorefresh(interval=300000, key="share_refresh")   # re-runs this page every 5 minutes
-    # save a point only if the last one is older than 4 minutes (avoids duplicates on every re-run)
     if (datetime.now() - box.get("last_log", datetime.min)).total_seconds() > 240:
         log_location()
         box["last_log"] = datetime.now()
-    st.success("Sharing is on. Parents can open this page with ?parent=1 added to the link.")
+        if parent_ok and not update_live("parent", loc["latitude"], loc["longitude"]):
+            send_location("parent", loc["latitude"], loc["longitude"])   # first time: start the live pin
+    st.success("Sharing is on." + (" Your parent sees a live pin in Telegram." if parent_ok else " Connect Telegram in Step 0."))
 
 def trigger_sos(reason):
     if not has_loc:
         st.error("Location is not available yet. Do Step 1 first.")
         return
-    link = f"https://maps.google.com/?q={loc['latitude']},{loc['longitude']}"
+    lat, lon = loc["latitude"], loc["longitude"]
+    link = f"https://maps.google.com/?q={lat},{lon}"
     log_location()
     box["alerts"].append({"time": f"{datetime.now():%d %b %H:%M:%S}", "reason": reason, "link": link})
-    if parent:
-        ok, msg = send_sms(parent, f"EMERGENCY from Campus Mate: I need help. My live location: {link}", whatsapp=wa)
-        st.error(f"SOS sent to your parent: {msg}") if ok else st.warning(f"Alert saved but message not sent: {msg}")
+    if parent_ok:
+        ok, msg = send_message("parent", f"🚨 EMERGENCY! Your child needs help ({reason}).\nMap: {link}")
+        send_location("parent", lat, lon)
+        st.error("SOS sent to your parent on Telegram.") if ok else st.warning(f"Alert saved but Telegram failed: {msg}")
     else:
-        st.warning("Alert saved. Add your parent's phone number to send a message.")
+        st.warning("Alert saved. Connect your parent's Telegram (Step 0) to send it.")
 
 st.write("**Step 2.** In danger? Press the button.")
 if st.button("🚨 SOS - I need help"):
@@ -85,5 +86,14 @@ if voice and st.session_state.get("last_voice") != voice.size:
         trigger_sos("voice: help") if data.get("help") else st.info("No emergency word heard.")
     except Exception as e:
         st.error(f"Could not check the audio: {e}")
+
+st.divider()
+st.write("**Messages from your parent** (they reply to the bot in Telegram)")
+if parent_ok and st.button("Check messages"):
+    msgs = replies("parent")
+    for m in msgs:
+        st.write("👨‍👩‍👧 " + m)
+    if not msgs:
+        st.info("No messages yet.")
 
 st.caption("Limits: the page must be open with location allowed. Always-on listening in the background needs a mobile app (future scope).")

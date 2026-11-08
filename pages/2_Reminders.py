@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime, date
 from theme import apply_theme
 from ai import ask_gemini, parse_json
-from notify import send_sms
+from notify import link_widget, send_message
 
 st.set_page_config(page_title="Reminders | Campus Mate", page_icon="⏰", layout="wide")
 apply_theme()
@@ -53,8 +53,9 @@ for i, r in enumerate(items):
 
 if soon:
     st.warning(f"{len(soon)} reminder(s) due in the next 24 hours.")
-    phone = st.text_input("Your phone for SMS (+91...)")
-    if st.button("Text me these") and phone:
-        ok, msg = send_sms(phone, "Campus Mate: " + "; ".join(f"{r['Task']} ({r['Due']:%d %b %I:%M %p})" for r in soon))
-        st.write(msg)
+    if link_widget("student", "You"):
+        if st.button("Send these to my Telegram"):
+            ok, msg = send_message("student", "Campus Mate reminders:\n" + "\n".join(
+                f"- {r['Task']} ({r['Due']:%d %b %I:%M %p})" for r in soon))
+            st.write("Sent" if ok else msg)
 st.caption("Reminders are kept while the page is open. Alerts when the app is closed need a background server (future scope).")

@@ -19,9 +19,10 @@ if "expenses" not in st.session_state:
 
 with st.form("add_expense", clear_on_submit=True):
     c1, c2, c3, c4 = st.columns(4)
-    d = c1.date_input("Date", date.today())
+    d = c1.date_input("Date", date.today(), format="DD/MM/YYYY")
     amt = c2.number_input("Amount (₹)", min_value=0.0, step=10.0)
-    cat = c3.selectbox("Spent on", ["Food", "Travel", "Books", "Fun", "Rent", "Other"])
+    cat = c3.selectbox("Spent on", ["Food", "Travel", "Books", "Recharge", "Rent", "Other"],
+                       accept_new_options=True, placeholder="Pick or type your own")   # typing a new word is allowed
     pay = c4.selectbox("Paid by", ["UPI", "Cash", "Card"])
     if st.form_submit_button("Add expense") and amt > 0:
         new = pd.DataFrame([[pd.Timestamp(d), amt, cat, pay]],
@@ -51,4 +52,5 @@ else:
     b.plotly_chart(px.bar(df.groupby("Payment method", as_index=False)["Amount"].sum(),
                           x="Payment method", y="Amount", title="By payment method"),
                    use_container_width=True)
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, use_container_width=True,
+                 column_config={"Date": st.column_config.DateColumn(format="DD/MM/YYYY")})

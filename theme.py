@@ -69,6 +69,9 @@ def apply_theme():
         backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
         border: 1px solid rgba(255,255,255,.28) !important; border-radius: 16px !important;
         box-shadow: 0 8px 24px rgba(5,5,40,.25), inset 0 1px 0 rgba(255,255,255,.3); }
+    /* Opened dropdown lists: clear every layer, glass on the outer panel, soft highlight on hover */
+    [data-baseweb="popover"] * { background: transparent !important; background-color: transparent !important; color: #fff !important; }
+    [data-baseweb="popover"] li:hover, [data-baseweb="popover"] [aria-selected="true"] { background: rgba(255,255,255,.16) !important; border-radius: 10px; }
     /* The calendar and the opened dropdown lists */
     [data-baseweb="popover"] > div { background: rgba(40,33,100,.80) !important; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
         border: 1px solid rgba(255,255,255,.25); border-radius: 16px; }

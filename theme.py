@@ -36,8 +36,26 @@ def apply_theme():
     [data-testid="stSidebarNav"] a[aria-current="page"] span { color: #fff !important; }
 
     /* Inputs and buttons also look like glass */
-    [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div {
-        background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.22) !important; border-radius: 14px !important; }
+    /* Every place you type or choose becomes frosted glass */
+    [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div, [data-testid="stAudioInput"] {
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05)) !important;
+        backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+        border: 1px solid rgba(255,255,255,.28) !important; border-radius: 16px !important;
+        box-shadow: 0 8px 24px rgba(5,5,40,.25), inset 0 1px 0 rgba(255,255,255,.3);
+        transition: border-color .2s, box-shadow .2s; }
+    [data-baseweb="base-input"], [data-baseweb="input"] input, [data-baseweb="textarea"] textarea,
+    [data-testid="stNumberInput"] button { background: transparent !important; color: #fff !important; }
+    [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"]:focus-within > div {
+        border-color: rgba(255,255,255,.75) !important; box-shadow: 0 0 0 3px rgba(124,156,255,.30), 0 8px 24px rgba(5,5,40,.25); }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,.45) !important; }
+    /* Dropdown lists, forms, expanders and tables */
+    [data-baseweb="popover"] [data-baseweb="menu"], [data-baseweb="popover"] [role="listbox"] {
+        background: rgba(40,33,100,.78) !important; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+        border: 1px solid rgba(255,255,255,.25); border-radius: 16px; }
+    [data-testid="stForm"], [data-testid="stExpander"] {
+        background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.22) !important; border-radius: 22px;
+        backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    [data-testid="stDataFrame"] { border: 1px solid rgba(255,255,255,.22); border-radius: 18px; overflow: hidden; }
     .stButton > button, [data-testid="stFormSubmitButton"] button {
         border-radius: 999px; color: #fff; font-weight: 600; padding: 8px 22px;
         background: linear-gradient(135deg, rgba(255,255,255,.30), rgba(255,255,255,.10));

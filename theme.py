@@ -60,6 +60,20 @@ def apply_theme():
     [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within, [data-baseweb="select"]:focus-within > div {
         border-color: rgba(255,255,255,.75) !important; box-shadow: 0 0 0 3px rgba(124,156,255,.30), 0 8px 24px rgba(5,5,40,.25); }
     input::placeholder, textarea::placeholder { color: rgba(255,255,255,.45) !important; }
+    /* Date picker and dropdown boxes: clear every inner layer, then draw the glass on the outer box only */
+    [data-testid="stDateInput"] *, [data-testid="stSelectbox"] *, [data-testid="stMultiSelect"] * {
+        background: transparent !important; background-color: transparent !important; }
+    [data-testid="stDateInput"] [data-baseweb="input"], [data-testid="stSelectbox"] [data-baseweb="select"] > div,
+    [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05)) !important;
+        backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+        border: 1px solid rgba(255,255,255,.28) !important; border-radius: 16px !important;
+        box-shadow: 0 8px 24px rgba(5,5,40,.25), inset 0 1px 0 rgba(255,255,255,.3); }
+    /* The calendar and the opened dropdown lists */
+    [data-baseweb="popover"] > div { background: rgba(40,33,100,.80) !important; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+        border: 1px solid rgba(255,255,255,.25); border-radius: 16px; }
+    [data-baseweb="calendar"], [data-baseweb="calendar"] div, [data-baseweb="popover"] ul, [data-baseweb="popover"] li {
+        background: transparent !important; color: #fff !important; }
     /* Hide the small "Press Enter to submit form" hint that sits on top of the typing area */
     [data-testid="InputInstructions"], [data-testid="stTextInput"] [class*="InputInstructions"] { display: none !important; }
     /* Boards (bordered containers) and message bars are glass too */

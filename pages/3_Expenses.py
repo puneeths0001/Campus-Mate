@@ -7,14 +7,15 @@ from theme import apply_theme
 
 st.set_page_config(page_title="Expenses | Campus Mate", page_icon="💸", layout="wide")
 apply_theme()
-st.title("💸 Expense tracker")
+head, side = st.columns([3, 1], vertical_alignment="bottom")
+head.title("💸 Expense tracker")
+limit = side.number_input("Monthly limit (₹)", min_value=0, value=5000, step=500)
 
 # session_state remembers data while the page is open (it resets on refresh)
 if "expenses" not in st.session_state:
     st.session_state.expenses = pd.DataFrame(
         columns=["Date", "Amount", "Category", "Payment method"])
 
-limit = st.sidebar.number_input("Monthly limit (₹)", min_value=0, value=5000, step=500)
 
 with st.form("add_expense", clear_on_submit=True):
     c1, c2, c3, c4 = st.columns(4)

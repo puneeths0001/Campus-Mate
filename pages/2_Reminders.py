@@ -54,12 +54,12 @@ def board(kind):
         added = False
         with st.form(f"form_{kind}", clear_on_submit=True, border=False):
             typed = st.text_input("Type", placeholder=hint, label_visibility="collapsed")
+            use_dt = st.checkbox("Set date & time", key=f"usedt_{kind}")   # tick it to attach the date and time below
             c1, c2 = st.columns(2)
-            d = c1.date_input("Date", value=None, format="DD/MM/YYYY", label_visibility="collapsed",
-                              placeholder="Date (optional)")
+            d = c1.date_input("Date", value=date.today(), format="DD/MM/YYYY", label_visibility="collapsed")
             t = c2.time_input("Time", value=dtime(9, 0), label_visibility="collapsed")
             if st.form_submit_button("Add") and typed.strip():
-                add_item(kind, typed.strip(), datetime.combine(d, t) if d else None)
+                add_item(kind, typed.strip(), datetime.combine(d, t) if use_dt else None)
                 added = True
         if added:
             st.rerun()

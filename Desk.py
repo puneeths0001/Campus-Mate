@@ -5,6 +5,7 @@ import html
 import pandas as pd
 from datetime import date, datetime
 from theme import apply_theme
+from when_parse import fmt
 
 st.set_page_config(page_title="Desk | Campus Mate", page_icon="🎓", layout="wide")
 apply_theme()
@@ -88,7 +89,7 @@ else:
 notes = [r for r in st.session_state.get("reminders", []) if r.get("Type") != "exam"]
 items = sorted(notes, key=lambda r: (r["Due"] is None, r["Due"] or datetime.max))[:4]
 if items:
-    rows = [(r["Task"], f"{r['Due']:%a %d/%m}, {r['Due'].hour % 12 or 12}:{r['Due']:%M} {r['Due']:%p}" if r["Due"] else "Note") for r in items]
+    rows = [(r["Task"], fmt(r["Due"], r.get("HasTime", True)) if r["Due"] else "Note") for r in items]
     notes_label = "Assignments & notes"
 else:
     rows = [("Maths assignment", "Fri, 5 pm"), ("Physics lab record", "Mon"),

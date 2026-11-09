@@ -64,10 +64,10 @@ CSS = r"""
         border-color: rgba(255,255,255,.75) !important; box-shadow: 0 0 0 3px rgba(124,156,255,.30), 0 8px 24px rgba(5,5,40,.25); }
     input::placeholder, textarea::placeholder { color: rgba(255,255,255,.45) !important; }
     /* Date picker and dropdown boxes: clear every inner layer, then draw the glass on the outer box only */
-    [data-testid="stDateInput"] *, [data-testid="stSelectbox"] *, [data-testid="stMultiSelect"] * {
+    [data-testid="stDateInput"] *, [data-testid="stTimeInput"] *, [data-testid="stSelectbox"] *, [data-testid="stMultiSelect"] * {
         background: transparent !important; background-color: transparent !important; }
     [data-testid="stDateInput"] [data-baseweb="input"], [data-testid="stSelectbox"] [data-baseweb="select"] > div,
-    [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
+    [data-testid="stTimeInput"] [data-baseweb="select"] > div, [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05)) !important;
         backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
         border: 1px solid rgba(255,255,255,.28) !important; border-radius: 16px !important;

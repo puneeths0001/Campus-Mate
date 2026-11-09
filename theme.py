@@ -1,21 +1,23 @@
 # theme.py - glassmorphism look: deep indigo background, blurred colour blobs, frosted-glass cards
 import html as _html
+import json
 import streamlit as st
+import streamlit.components.v1 as components
 
-def apply_theme():
-    st.markdown("""
-    <style>
+CSS = r"""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     html, body, [class*="css"], .stApp { font-family: 'Inter', sans-serif; }
     /* Big soft blobs (blue, pink, orange) on a deep indigo base */
-    .stApp {
+    .stApp { background: #17133F; isolation: isolate; }
+    .stApp::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; transform: translateZ(0);
         background:
           radial-gradient(42% 36% at 28% 2%,  rgba(79,134,255,.60), transparent 70%),
           radial-gradient(46% 42% at 0% 100%, rgba(255,79,195,.55), transparent 70%),
-          radial-gradient(36% 38% at 100% 92%, rgba(255,155,61,.50), transparent 70%),
-          #17133F;
-        background-attachment: fixed;
-    }
+          radial-gradient(36% 38% at 100% 92%, rgba(255,155,61,.50), transparent 70%); }
+    html, body { background: #17133F; }
+    /* the invisible helper frame that installs this theme must take no space */
+    .element-container:has(iframe[height="0"]), [data-testid="stElementContainer"]:has(iframe[height="0"]) {
+        position: absolute; height: 0; margin: 0; overflow: hidden; }
     header[data-testid="stHeader"] { background: transparent; }
     h1, h2, h3 { color: #fff; font-weight: 700; letter-spacing: -0.02em; }
 
@@ -139,8 +141,25 @@ def apply_theme():
     @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
     @keyframes slidein { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
-    </style>
-    """, unsafe_allow_html=True)
+"""
+
+# A tiny script that puts the CSS into the browser's <head> ONE time. The <head> is not cleared when you
+# switch pages, so the background and glass stay in place and there is no flash of a plain black page.
+_INSTALL = """<script>
+const d = window.parent.document;
+if (!d.getElementById('campus-theme')) {
+  const s = d.createElement('style'); s.id = 'campus-theme'; s.textContent = __CSS__; d.head.appendChild(s);
+}
+</script>"""
+
+def apply_theme():
+    try:
+        components.html(_INSTALL.replace("__CSS__", json.dumps(CSS)), height=0)
+    except Exception:
+        pass
+    # Safety net: also add it the normal way (this copy is rebuilt on every page switch)
+    st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
+
 
 
 def glass_table(df, right=()):

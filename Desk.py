@@ -124,7 +124,7 @@ st.markdown("""
 <div class="g-card" style="--c:#4F86FF"><div class="g-ico">💸</div><div class="g-t">Expense tracker</div><div class="g-p">See where your money goes and when you cross your limit.</div></div>
 <div class="g-card" style="--c:#4F86FF"><div class="g-ico">🛡️</div><div class="g-t">Scam detector</div><div class="g-p">Paste a link, email or offer and get a risk score with reasons.</div></div>
 <div class="g-card" style="--c:#FF9B3D"><div class="g-ico">📊</div><div class="g-t">CGPA planner</div><div class="g-p">Find which subjects pull your CGPA down and how to fix it.</div></div>
-<div class="g-card" style="--c:#FF4FC3"><div class="g-ico">🧠</div><div class="g-t">Notes to flowchart</div><div class="g-p">Turn messy notes into a diagram for fast revision.</div></div>
+<div class="g-card" style="--c:#FF4FC3"><div class="g-ico">🧠</div><div class="g-t">AI Study Buddy</div><div class="g-p">Ask doubts, solve problems, and make notes and flowcharts in a chat.</div></div>
 </div>
 """, unsafe_allow_html=True)
 st.caption("Open each tool from the menu on the left.")

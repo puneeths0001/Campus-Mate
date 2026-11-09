@@ -140,6 +140,15 @@ CSS = r"""
         background: linear-gradient(135deg, rgba(255,255,255,.38), rgba(255,255,255,.16)) !important; border-color: rgba(255,255,255,.65) !important; }
     @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
     @keyframes slidein { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
+    /* Chat: glass message bubbles and a glass message box */
+    [data-testid="stChatMessage"] { background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+        border: 1px solid rgba(255,255,255,.20); border-radius: 22px; padding: 14px 18px;
+        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    [data-testid="stBottom"], [data-testid="stBottom"] > div, [data-testid="stBottomBlockContainer"] { background: transparent !important; }
+    [data-testid="stChatInput"] { background: linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.06)) !important;
+        border: 1px solid rgba(255,255,255,.30) !important; border-radius: 22px !important;
+        backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+    [data-testid="stChatInput"] > div, [data-testid="stChatInput"] textarea { background: transparent !important; color: #fff !important; }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 """
 

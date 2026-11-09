@@ -1,6 +1,6 @@
 # pages/2_Reminders.py - three side-by-side boards: announcements, assignments, exams
 import streamlit as st
-from datetime import datetime, date, time as dtime
+from datetime import datetime, date, timedelta, time as dtime
 from theme import apply_theme
 from ai import ask_gemini, parse_json
 from notify import link_widget, send_message
@@ -18,6 +18,19 @@ KINDS = {   # kind: (icon, title, example shown in the box)
     "assignment": ("📝", "Assignment reminder", "e.g. Maths assignment submission"),
     "exam": ("🎯", "Upcoming exams", "e.g. DBMS exam"),
 }
+
+# Date choices (next 6 months) show the weekday, e.g. "Mon 09/11". Time choices use AM / PM.
+DATES = [date.today() + timedelta(days=i) for i in range(181)]
+TIMES = [dtime(h, m) for h in range(24) for m in range(0, 60, 5)] + [dtime(23, 59)]   # 5-minute steps, plus 11:59 PM
+
+def date_label(d):
+    return f"{d:%a %d/%m}"
+
+def time_label(t):
+    return f"{t.hour % 12 or 12}:{t.minute:02d} {'AM' if t.hour < 12 else 'PM'}"
+
+def fmt(due):
+    return f"{due:%a %d/%m}, {time_label(due.time())}"          # Mon 09/11, 9:00 AM
 
 def add_item(kind, task, due):
     st.session_state.rid += 1
@@ -42,7 +55,7 @@ def when(due):
         return "📌 No date"
     hours = (due - datetime.now()).total_seconds() / 3600
     tag = "⚠️ Overdue" if hours < 0 else "🔔 Within 24 hours" if hours <= 24 else "✅ Upcoming"
-    return f"{due:%d/%m/%Y, %I:%M %p} · {tag}"
+    return f"{fmt(due)} · {tag}"
 
 @st.fragment   # each board refreshes by itself, so the other boards do not grey out while it works
 def board(kind):
@@ -56,8 +69,9 @@ def board(kind):
             typed = st.text_input("Type", placeholder=hint, label_visibility="collapsed")
             use_dt = st.checkbox("Set date & time", key=f"usedt_{kind}")   # tick it to attach the date and time below
             c1, c2 = st.columns(2)
-            d = c1.date_input("Date", value=date.today(), format="DD/MM/YYYY", label_visibility="collapsed")
-            t = c2.time_input("Time", value=dtime(9, 0), label_visibility="collapsed")
+            d = c1.selectbox("Date", DATES, format_func=date_label, key=f"date_{kind}", label_visibility="collapsed")
+            t = c2.selectbox("Time", TIMES, index=TIMES.index(dtime(9, 0)), format_func=time_label,
+                             key=f"time_{kind}", label_visibility="collapsed")
             if st.form_submit_button("Add") and typed.strip():
                 add_item(kind, typed.strip(), datetime.combine(d, t) if use_dt else None)
                 added = True
@@ -108,6 +122,6 @@ if soon:
     if link_widget("student", "You"):
         if st.button("Send these to my Telegram"):
             ok, msg = send_message("student", "Campus Mate reminders:\n" + "\n".join(
-                f"- {r['Task']} ({r['Due']:%d/%m/%Y %I:%M %p})" for r in soon))
+                f"- {r['Task']} ({fmt(r['Due'])})" for r in soon))
             st.write("Sent" if ok else msg)
 st.caption("Items are kept while the page is open. Alerts when the app is closed need a background server (future scope).")

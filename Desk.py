@@ -88,7 +88,7 @@ else:
 notes = [r for r in st.session_state.get("reminders", []) if r.get("Type") != "exam"]
 items = sorted(notes, key=lambda r: (r["Due"] is None, r["Due"] or datetime.max))[:4]
 if items:
-    rows = [(r["Task"], f"{r['Due']:%d %b, %I:%M %p}" if r["Due"] else "Note") for r in items]
+    rows = [(r["Task"], f"{r['Due']:%a %d/%m}, {r['Due'].hour % 12 or 12}:{r['Due']:%M} {r['Due']:%p}" if r["Due"] else "Note") for r in items]
     notes_label = "Assignments & notes"
 else:
     rows = [("Maths assignment", "Fri, 5 pm"), ("Physics lab record", "Mon"),

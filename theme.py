@@ -114,7 +114,7 @@ def apply_theme():
     .gt tr:last-child td { border-bottom: none; }
     .gt tbody tr:hover td { background: rgba(255,255,255,.08); }
     .gt .r { text-align: right; }
-    /* Sidebar menu: frosted-glass pills that slide in, float gently, and giggle when you hover */
+    /* Sidebar menu: frosted-glass pills that slide in and float gently */
     [data-testid="stSidebarNav"] a, a[data-testid="stSidebarNavLink"] {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.04)) !important;
         border: 1px solid rgba(255,255,255,.22) !important; border-radius: 16px !important; margin: 6px 12px; padding: 4px 6px;
@@ -132,16 +132,12 @@ def apply_theme():
     [data-testid="stSidebarNav"] li:nth-child(7) { --d: 0.48s; --f: -4.2s; }
     [data-testid="stSidebarNav"] li:nth-child(8) { --d: 0.56s; --f: -4.9s; }
     [data-testid="stSidebarNav"] a:hover, a[data-testid="stSidebarNavLink"]:hover {
-        animation: giggle .6s ease-in-out !important; border-color: rgba(255,255,255,.6) !important;
+        border-color: rgba(255,255,255,.6) !important;
         background: linear-gradient(135deg, rgba(255,255,255,.30), rgba(255,255,255,.10)) !important; }
     [data-testid="stSidebarNav"] a[aria-current="page"], a[data-testid="stSidebarNavLink"][aria-current="page"] {
         background: linear-gradient(135deg, rgba(255,255,255,.38), rgba(255,255,255,.16)) !important; border-color: rgba(255,255,255,.65) !important; }
     @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
     @keyframes slidein { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes giggle {
-        0%, 100% { transform: rotate(0) scale(1.03); } 20% { transform: rotate(-2.5deg) scale(1.05); }
-        40% { transform: rotate(2.5deg) scale(1.05); } 60% { transform: rotate(-1.5deg) scale(1.04); }
-        80% { transform: rotate(1.5deg) scale(1.04); } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
     </style>
     """, unsafe_allow_html=True)

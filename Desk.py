@@ -2,6 +2,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import html
+import json
 from pathlib import Path
 import pandas as pd
 from datetime import date, datetime
@@ -117,13 +118,15 @@ st.markdown("""
 .g-t { position:relative; color:#fff; font-size:19px; font-weight:700; letter-spacing:-.02em; }
 .g-p { position:relative; color:rgba(255,255,255,.75); font-size:14px; line-height:1.5; margin-top:6px; }
 
-/* Make the whole card a link: an invisible page link is stretched over it */
-[data-testid="stColumn"] [data-testid="stVerticalBlock"], [data-testid="column"] [data-testid="stVerticalBlock"] { position:relative; }
-[data-testid="stColumn"] [data-testid="stElementContainer"]:has([data-testid="stPageLink"]),
-[data-testid="column"] .element-container:has([data-testid="stPageLink"]) { position:absolute; inset:0; z-index:5; margin:0; }
-[data-testid="stPageLink"], [data-testid="stPageLink"] a { display:block; width:100%; height:100%; cursor:pointer; border-radius:26px; }
-[data-testid="stPageLink"] a, [data-testid="stPageLink"] a * { color:transparent !important; background:transparent !important; }
+/* The "Open" pill sits inside the bottom of each card. Clicking the card itself also works (small script below). */
+.g-card { cursor:pointer; padding-bottom:58px; }
 [data-testid="stColumn"]:hover .g-card, [data-testid="column"]:hover .g-card { transform:translateY(-4px); border-color:rgba(255,255,255,.55); }
+[data-testid="stElementContainer"]:has([data-testid="stPageLink"]), .element-container:has([data-testid="stPageLink"]) {
+    margin-top:-54px; margin-left:24px; position:relative; z-index:3; width:fit-content; transition:transform .2s ease; }
+[data-testid="stColumn"]:hover [data-testid="stPageLink"], [data-testid="column"]:hover [data-testid="stPageLink"] { transform:translateY(-4px); }
+[data-testid="stPageLink"] a { width:fit-content; background:rgba(255,255,255,.16) !important; border:1px solid rgba(255,255,255,.32);
+    border-radius:999px; padding:3px 16px; color:#fff !important; }
+[data-testid="stPageLink"] a:hover { background:rgba(255,255,255,.30) !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -138,12 +141,30 @@ CARDS = [   # (page number, icon, title, text, glow colour)
     ("5", "📊", "CGPA planner", "Enter your marks and see which subjects pull your SGPA down.", "#FF9B3D"),
     ("6", "🧠", "AI Study Buddy", "Ask doubts, solve problems, and make notes and flowcharts in a chat.", "#FF4FC3"),
 ]
+NAV = {"1": "safety", "2": "remind", "3": "expense", "4": "scam", "5": "cgpa", "6": "study"}   # a word from each menu label
 for row in (CARDS[:3], CARDS[3:]):
     cols = st.columns(3)
     for col, (num, icon, title, text, color) in zip(cols, row):
         with col:
-            st.markdown(f'<div class="g-card" style="--c:{color}"><div class="g-ico">{icon}</div>'
+            st.markdown(f'<div class="g-card" data-nav="{NAV[num]}" style="--c:{color}"><div class="g-ico">{icon}</div>'
                         f'<div class="g-t">{title}</div><div class="g-p">{text}</div></div>', unsafe_allow_html=True)
             if num in PAGES:
-                st.page_link(PAGES[num], label=f"Open {title}")   # clicking the card opens that page
+                st.page_link(PAGES[num], label="Open →")   # a button that always works
+
+# Clicking anywhere on a card presses the matching menu link on the left (so the page changes without reloading).
+# The script is placed in the browser's own page, so it keeps working after you switch pages.
+_CARD_JS = """(function () {
+  if (window.__cmCards) return; window.__cmCards = true;
+  document.addEventListener('click', function (e) {
+    var card = e.target.closest && e.target.closest('.g-card[data-nav]');
+    if (!card) return;
+    var want = card.getAttribute('data-nav');
+    var links = document.querySelectorAll('[data-testid="stSidebarNav"] a, a[data-testid="stSidebarNavLink"]');
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].textContent.toLowerCase().indexOf(want) > -1) { links[i].click(); break; }
+    }
+  });
+})();"""
+components.html("<script>const d = window.parent.document; if (!d.getElementById('cm-cards')) { const s = d.createElement('script'); "
+                "s.id = 'cm-cards'; s.textContent = " + json.dumps(_CARD_JS) + "; d.head.appendChild(s); }</script>", height=0)
 st.caption("Click a card, or use the menu on the left.")

@@ -2,6 +2,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import html
+from pathlib import Path
 import pandas as pd
 from datetime import date, datetime
 from theme import apply_theme
@@ -104,28 +105,45 @@ components.html(page, height=450)
 st.subheader("What Campus Mate does")
 st.markdown("""
 <style>
-.g-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:6px; }
 .g-card { position:relative; overflow:hidden; border-radius:26px; padding:24px; min-height:170px;
           background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.05));
           border:1px solid rgba(255,255,255,.26); backdrop-filter:blur(22px) saturate(140%);
           box-shadow:0 18px 40px rgba(5,5,40,.30), inset 0 1px 0 rgba(255,255,255,.3);
-          transition:transform .2s ease, border-color .2s ease; }
-.g-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,.55); }
+          transition:transform .2s ease, border-color .2s ease; margin-bottom:6px; }
 .g-card::before { content:""; position:absolute; width:150px; height:150px; right:-50px; top:-50px; border-radius:50%;
           background:var(--c); filter:blur(38px); opacity:.55; }
 .g-ico { position:relative; width:48px; height:48px; border-radius:16px; display:grid; place-items:center; font-size:24px;
          background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); margin-bottom:14px; }
 .g-t { position:relative; color:#fff; font-size:19px; font-weight:700; letter-spacing:-.02em; }
 .g-p { position:relative; color:rgba(255,255,255,.75); font-size:14px; line-height:1.5; margin-top:6px; }
-@media (max-width:900px) { .g-grid { grid-template-columns:1fr; } }
+
+/* Make the whole card a link: an invisible page link is stretched over it */
+[data-testid="stColumn"] [data-testid="stVerticalBlock"], [data-testid="column"] [data-testid="stVerticalBlock"] { position:relative; }
+[data-testid="stColumn"] [data-testid="stElementContainer"]:has([data-testid="stPageLink"]),
+[data-testid="column"] .element-container:has([data-testid="stPageLink"]) { position:absolute; inset:0; z-index:5; margin:0; }
+[data-testid="stPageLink"], [data-testid="stPageLink"] a { display:block; width:100%; height:100%; cursor:pointer; border-radius:26px; }
+[data-testid="stPageLink"] a, [data-testid="stPageLink"] a * { color:transparent !important; background:transparent !important; }
+[data-testid="stColumn"]:hover .g-card, [data-testid="column"]:hover .g-card { transform:translateY(-4px); border-color:rgba(255,255,255,.55); }
 </style>
-<div class="g-grid">
-<div class="g-card" style="--c:#FF4FC3"><div class="g-ico">🚨</div><div class="g-t">Safety SOS</div><div class="g-p">Say “help” and your parents get your live location.</div></div>
-<div class="g-card" style="--c:#FF9B3D"><div class="g-ico">⏰</div><div class="g-t">Voice reminders</div><div class="g-p">Speak a deadline once. We remind you before it is due.</div></div>
-<div class="g-card" style="--c:#4F86FF"><div class="g-ico">💸</div><div class="g-t">Expense tracker</div><div class="g-p">See where your money goes and when you cross your limit.</div></div>
-<div class="g-card" style="--c:#4F86FF"><div class="g-ico">🛡️</div><div class="g-t">Scam detector</div><div class="g-p">Paste a link, email or offer and get a risk score with reasons.</div></div>
-<div class="g-card" style="--c:#FF9B3D"><div class="g-ico">📊</div><div class="g-t">CGPA planner</div><div class="g-p">Find which subjects pull your CGPA down and how to fix it.</div></div>
-<div class="g-card" style="--c:#FF4FC3"><div class="g-ico">🧠</div><div class="g-t">AI Study Buddy</div><div class="g-p">Ask doubts, solve problems, and make notes and flowcharts in a chat.</div></div>
-</div>
 """, unsafe_allow_html=True)
-st.caption("Open each tool from the menu on the left.")
+
+# Find each page file by its number, so the cards still work if a file is renamed (for example 2_Reminder.py)
+PAGES = {p.name.split("_")[0]: f"pages/{p.name}" for p in sorted((Path(__file__).parent / "pages").glob("*.py"))}
+
+CARDS = [   # (page number, icon, title, text, glow colour)
+    ("1", "🚨", "Safety SOS", "Say “help” and your parents get your live location.", "#FF4FC3"),
+    ("2", "⏰", "Reminders", "Announcements, assignments and exams, typed or spoken.", "#FF9B3D"),
+    ("3", "💸", "Expense tracker", "See where your money goes and when you cross your limit.", "#4F86FF"),
+    ("4", "🛡️", "Scam detector", "Paste a link, email or offer and get a live risk check.", "#4F86FF"),
+    ("5", "📊", "CGPA planner", "Enter your marks and see which subjects pull your SGPA down.", "#FF9B3D"),
+    ("6", "🧠", "AI Study Buddy", "Ask doubts, solve problems, and make notes and flowcharts in a chat.", "#FF4FC3"),
+]
+for row in (CARDS[:3], CARDS[3:]):
+    cols = st.columns(3)
+    for col, (num, icon, title, text, color) in zip(cols, row):
+        with col:
+            st.markdown(f'<div class="g-card" style="--c:{color}"><div class="g-ico">{icon}</div>'
+                        f'<div class="g-t">{title}</div><div class="g-p">{text}</div></div>', unsafe_allow_html=True)
+            if num in PAGES:
+                st.page_link(PAGES[num], label=f"Open {title}")   # clicking the card opens that page
+st.caption("Click a card, or use the menu on the left.")

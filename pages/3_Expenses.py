@@ -47,11 +47,15 @@ else:
         st.warning("You have used more than 80% of your monthly limit.")
 
     a, b = st.columns(2)
-    a.plotly_chart(px.pie(df, values="Amount", names="Category", hole=0.45,
-                          title="Where the money went"), use_container_width=True)
-    b.plotly_chart(px.bar(df.groupby("Payment method", as_index=False)["Amount"].sum(),
-                          x="Payment method", y="Amount", title="By payment method"),
-                   use_container_width=True)
+    def glassfig(fig):   # dark, see-through charts with white text, whatever the viewer's device theme is
+        fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                          font_color="#fff", margin=dict(t=50, l=10, r=10, b=10))
+        return fig
+    a.plotly_chart(glassfig(px.pie(df, values="Amount", names="Category", hole=0.45,
+                                   title="Where the money went")), use_container_width=True, theme=None)
+    b.plotly_chart(glassfig(px.bar(df.groupby("Payment method", as_index=False)["Amount"].sum(),
+                                   x="Payment method", y="Amount", title="By payment method")),
+                   use_container_width=True, theme=None)
     st.subheader("All expenses")
     show = df.copy()
     show["Date"] = pd.to_datetime(show["Date"]).dt.strftime("%d/%m/%Y")

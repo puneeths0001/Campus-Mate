@@ -20,6 +20,16 @@ CSS = r"""
         position: absolute; height: 0; margin: 0; overflow: hidden; }
     header[data-testid="stHeader"] { background: transparent; }
     h1, h2, h3 { color: #fff; font-weight: 700; letter-spacing: -0.02em; }
+    /* Other people's phones and PCs may be in LIGHT mode, which would make Streamlit use dark text on our dark page.
+       So every kind of text is forced to white here, and the page is told it is dark. */
+    :root { color-scheme: dark; }
+    .stApp, .stApp p, .stApp span, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6,
+    .stApp [data-testid="stMarkdownContainer"], .stApp [data-testid="stWidgetLabel"], .stApp [data-testid="stWidgetLabel"] *,
+    .stApp [data-testid="stMetricLabel"], .stApp [data-testid="stMetricLabel"] *, .stApp [data-testid="stMetricValue"], .stApp [data-testid="stMetricValue"] *,
+    .stApp [data-testid="stAlert"] *, .stApp [data-testid="stExpander"] summary, .stApp [data-testid="stExpander"] summary *,
+    .stApp [data-testid="stRadio"] *, .stApp [data-testid="stCheckbox"] *, .stApp [data-testid="stToggle"] *,
+    .stApp [data-testid="stChatMessage"] * { color: #fff !important; }
+    .stApp [data-testid="stCaptionContainer"], .stApp [data-testid="stCaptionContainer"] *, .stApp small { color: rgba(255,255,255,.72) !important; }
 
     /* The glass recipe: translucent white + blur + thin bright border + soft shadow */
     .glass, [data-testid="stMetric"], [data-testid="stSidebar"] {

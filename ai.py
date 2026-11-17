@@ -4,8 +4,8 @@ import streamlit as st
 
 # (model name, extra settings). "Low thinking" makes answers start much faster.
 MODELS = [
-    ("gemini-3.8-flash", {"thinkingConfig": {"thinkingLevel": "low"}}),
-    ("gemini-2.5-flash", {"thinkingConfig": {"thinkingBudget": 0}}),
+    ("gemini-2.5-flash", {"thinkingConfig": {"thinkingBudget": 0}}),          # fast and steady, so it goes first
+    ("gemini-3.8-flash", {"thinkingConfig": {"thinkingLevel": "low"}}),       # newer, but often busy or slow
     ("gemini-2.5-flash-lite", {}),
 ]
 URL = "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent"
@@ -42,8 +42,11 @@ def _call(contents, system=None):
         for attempt in range(2):
             try:
                 r = requests.post(URL.format(model), headers={"x-goog-api-key": key},
-                                  json=_body(contents, system, gen if use_gen else None), timeout=90)
+                                  json=_body(contents, system, gen if use_gen else None), timeout=40)
                 status = r.status_code
+            except requests.Timeout:
+                error = f"{model}: no answer in time"
+                break                                # too slow: try the next model
             except requests.RequestException as e:
                 error = f"{model}: network problem ({type(e).__name__})"
                 time.sleep(1)
@@ -66,18 +69,25 @@ def _call(contents, system=None):
             raise RuntimeError(error)
     raise RuntimeError(error or "Gemini did not answer.")
 
-def stream_gemini(contents, system=None):
-    """Like _call, but gives the answer in small pieces as Gemini writes it, so the first words appear quickly."""
+def stream_gemini(contents, system=None, notify=None):
+    """Like _call, but gives the answer in small pieces as Gemini writes it, so the first words appear quickly.
+    notify(text) is called with short progress messages such as 'Asking gemini-2.5-flash...'."""
     key = _need_key()
     error = ""
+    say = notify or (lambda text: None)
     for model, gen in MODELS:
         status, use_gen = None, True
         for attempt in range(2):
+            say(f"Asking {model}..." if attempt == 0 else f"{model} is busy, trying again...")
             try:
                 r = requests.post(STREAM_URL.format(model), headers={"x-goog-api-key": key},
                                   json=_body(contents, system, gen if use_gen else None),
-                                  timeout=(10, 120), stream=True)
+                                  timeout=(10, 30), stream=True)
                 status = r.status_code
+            except requests.Timeout:
+                error = f"{model}: no answer in time"
+                say(f"{model} is too slow, switching model...")
+                break                                # waited long enough: try the next model
             except requests.RequestException as e:
                 error = f"{model}: network problem ({type(e).__name__})"
                 time.sleep(1)
@@ -137,8 +147,8 @@ def _chat_contents(messages):
 def chat_gemini(messages, system):
     return _call(_chat_contents(messages), system)
 
-def chat_stream(messages, system):
-    return stream_gemini(_chat_contents(messages), system)
+def chat_stream(messages, system, notify=None):
+    return stream_gemini(_chat_contents(messages), system, notify)
 
 def strip_fences(text):
     return re.sub(r"^```[a-zA-Z]*\n?|```$", "", text.strip(), flags=re.M).strip()

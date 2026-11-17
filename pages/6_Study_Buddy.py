@@ -75,7 +75,7 @@ if prompt:
             box, acc = st.empty(), ""
             box.markdown("*Thinking...*")
             try:
-                for piece in chat_stream(st.session_state.chat, SYSTEM):     # the answer appears as Gemini writes it
+                for piece in chat_stream(st.session_state.chat, SYSTEM, notify=lambda m: box.markdown(f"*{m}*")):   # answer appears as Gemini writes it
                     acc += piece
                     box.markdown(acc + " ▌")
                 box.empty()

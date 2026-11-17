@@ -67,7 +67,10 @@ def trigger_sos(reason):
     if parent_ok:
         ok, msg = send_message("parent", f"🚨 EMERGENCY! Your child needs help ({reason}).\nMap: {link}")
         send_location("parent", lat, lon)
-        st.error("SOS sent to your parent on Telegram.") if ok else st.warning(f"Alert saved but Telegram failed: {msg}")
+        if ok:
+            st.error("SOS sent to your parent on Telegram.")
+        else:
+            st.warning(f"Alert saved but Telegram failed: {msg}")
     else:
         st.warning("Alert saved. Connect your parent's Telegram (Step 0) to send it.")
 
@@ -83,7 +86,10 @@ if voice and st.session_state.get("last_voice") != voice.size:
         data = parse_json(ask_gemini('Listen to the audio. Reply ONLY with JSON {"help": true or false}. '
                                      'true if the person says help, save me, bachao or similar.',
                                      audio=voice.getvalue()))
-        trigger_sos("voice: help") if data.get("help") else st.info("No emergency word heard.")
+        if data.get("help"):
+            trigger_sos("voice: help")
+        else:
+            st.info("No emergency word heard.")
     except Exception as e:
         st.error(f"Could not check the audio: {e}")
 

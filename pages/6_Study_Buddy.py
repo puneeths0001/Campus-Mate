@@ -53,7 +53,10 @@ for m in st.session_state.chat:
     with st.chat_message(m["role"]):
         for data, _ in m.get("imgs", []):
             st.image(data, width=260)
-        show(m["text"]) if m["role"] == "assistant" else st.markdown(m["text"])
+        if m["role"] == "assistant":
+            show(m["text"])
+        else:
+            st.markdown(m["text"])
 
 prompt = st.chat_input("Ask anything, or paste your notes...", accept_file=True,
                        file_type=["png", "jpg", "jpeg", "webp"])

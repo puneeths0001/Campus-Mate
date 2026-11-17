@@ -3,12 +3,19 @@ import streamlit as st
 from datetime import datetime, date, time as dtime
 from theme import apply_theme
 from ai import ask_gemini, parse_json
-from notify import link_widget, send_message
-from when_parse import parse_date, parse_time, fmt
+from notify import link_widget, send_message, chat_id
+from streamlit_autorefresh import st_autorefresh
+from when_parse import parse_date, parse_time, fmt, initial_sent, next_alert
 
 st.set_page_config(page_title="Reminder | Campus Mate", page_icon="⏰", layout="wide")
 apply_theme()
 st.title("⏰ Reminder")
+
+with st.container(border=True):
+    st.write("📨 **Reminders on Telegram**")
+    if link_widget("student", "You"):
+        st.caption("You get a Telegram message when you save an item, 24 hours before, 1 hour before, and when it is due. "
+                   "This works while this page is open.")
 
 if "reminders" not in st.session_state:
     st.session_state.reminders = []   # each item: id, Type, Task, Due (date and time or None), HasTime
@@ -20,9 +27,16 @@ KINDS = {   # kind: (icon, title, example shown in the box)
     "exam": ("🎯", "Upcoming exams", "e.g. DBMS exam"),
 }
 
+def notify_student(text):
+    """Sends a Telegram message to the student if they are connected. Returns True if it was sent."""
+    return send_message("student", text)[0] if chat_id("student") else False
+
 def add_item(kind, task, due, has_time):
     st.session_state.rid += 1
-    st.session_state.reminders.append({"id": st.session_state.rid, "Type": kind, "Task": task, "Due": due, "HasTime": has_time})
+    st.session_state.reminders.append({"id": st.session_state.rid, "Type": kind, "Task": task, "Due": due,
+                                       "HasTime": has_time, "Sent": initial_sent(due)})
+    when_txt = f"\nDue: {fmt(due, has_time)}" if due else ""
+    notify_student(f"✅ Saved {KINDS[kind][0]}\n{task}{when_txt}")      # instant confirmation
 
 def add_cb(kind):
     """Runs when you press Add. Reads the boxes, checks them, saves the item and empties the boxes."""
@@ -113,14 +127,20 @@ for col, kind in zip(cols, KINDS):
     with col:
         board(kind)
 
-# Send everything due in the next 24 hours to the student's own Telegram
+# Automatic Telegram alerts (while this page is open): 24 hours before, 1 hour before, and when it is due
+now = datetime.now()
+for r in st.session_state.reminders:
+    hit = next_alert(r["Due"], r.get("Sent", set()), now)
+    if hit:
+        keys, label = hit
+        msg = f"{label}\n{KINDS[r['Type']][0]} {r['Task']}\nDue: {fmt(r['Due'], r.get('HasTime', True))}"
+        if notify_student(msg):
+            r.setdefault("Sent", set()).update(keys)
+
 soon = [r for r in st.session_state.reminders
-        if r["Due"] and 0 <= (r["Due"] - datetime.now()).total_seconds() <= 86400]
+        if r["Due"] and 0 <= (r["Due"] - now).total_seconds() <= 86400]
 if soon:
     st.warning(f"{len(soon)} item(s) due in the next 24 hours.")
-    if link_widget("student", "You"):
-        if st.button("Send these to my Telegram"):
-            ok, msg = send_message("student", "Campus Mate reminders:\n" + "\n".join(
-                f"- {r['Task']} ({fmt(r['Due'], r.get('HasTime', True))})" for r in soon))
-            st.write("Sent" if ok else msg)
+if chat_id("student") and any(r["Due"] for r in st.session_state.reminders):
+    st_autorefresh(interval=60000, key="tick")          # checks again every minute
 st.caption("Items are kept while the page is open. Alerts when the app is closed need a background server (future scope).")

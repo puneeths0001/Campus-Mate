@@ -46,3 +46,26 @@ def time_label(t):
 def fmt(due, has_time=True):
     """Mon 09/11, 5:30 PM  (the weekday is worked out automatically)."""
     return f"{due:%a %d/%m}" + (f", {time_label(due.time())}" if has_time else "")
+
+# ---------- Automatic alerts: when to message the student ----------
+STAGES = [("day", 24, "⏰ Due within 24 hours"), ("hour", 1, "🔔 Due in about 1 hour"), ("now", 0, "⚠️ Due now")]
+
+def initial_sent(due, now=None):
+    """A new item that is already inside a stage does not need that stage's alert again (it gets a 'saved' message)."""
+    if due is None:
+        return set()
+    hrs = (due - (now or datetime.now())).total_seconds() / 3600
+    return {key for key, limit, _ in STAGES if hrs <= limit}
+
+def next_alert(due, sent, now=None):
+    """Returns (stages to mark as sent, message title) for the most urgent stage reached and not yet sent, or None."""
+    if due is None:
+        return None
+    hrs = (due - (now or datetime.now())).total_seconds() / 3600
+    reached = [s for s in STAGES if hrs <= s[1]]
+    if not reached:
+        return None
+    key, _, label = reached[-1]                      # the most urgent stage reached
+    if key in sent:
+        return None
+    return {k for k, _, _ in reached}, ("⚠️ Overdue" if hrs < -1 else label)

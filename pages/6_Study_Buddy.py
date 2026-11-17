@@ -2,7 +2,7 @@
 import re
 import streamlit as st
 from theme import apply_theme
-from ai import chat_gemini
+from ai import chat_stream
 
 st.set_page_config(page_title="Study Buddy | Campus Mate", page_icon="🧠", layout="wide")
 apply_theme()
@@ -72,14 +72,24 @@ if prompt:
                 st.image(data, width=260)
             st.markdown(text)
         with st.chat_message("assistant"):
+            box, acc = st.empty(), ""
+            box.markdown("*Thinking...*")
             try:
-                with st.spinner("Thinking..."):
-                    reply = chat_gemini(st.session_state.chat, SYSTEM)
-                show(reply)
-                st.session_state.chat.append({"role": "assistant", "text": reply, "sent": reply})
+                for piece in chat_stream(st.session_state.chat, SYSTEM):     # the answer appears as Gemini writes it
+                    acc += piece
+                    box.markdown(acc + " ▌")
+                box.empty()
+                show(acc)                                                    # flowchart code becomes a real diagram here
+                st.session_state.chat.append({"role": "assistant", "text": acc, "sent": acc})
             except Exception as e:
-                st.session_state.chat.pop()          # forget the failed question so you can simply send it again
-                if "503" in str(e) or "UNAVAILABLE" in str(e):
-                    st.error("Gemini is very busy right now. Wait a few seconds and send your message again.")
+                box.empty()
+                if acc:                                                      # keep the part that already arrived
+                    show(acc)
+                    st.session_state.chat.append({"role": "assistant", "text": acc, "sent": acc})
+                    st.warning("The answer stopped early. Ask me to continue if you need the rest.")
                 else:
-                    st.error(f"Could not get an answer: {e}")
+                    st.session_state.chat.pop()                              # forget the failed question so you can send it again
+                    if "503" in str(e) or "UNAVAILABLE" in str(e):
+                        st.error("Gemini is very busy right now. Wait a few seconds and send your message again.")
+                    else:
+                        st.error(f"Could not get an answer: {e}")
